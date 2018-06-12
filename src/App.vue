@@ -2,7 +2,6 @@
   <div id="app">
     <b-table 
     :data="attendees" 
-    :columns="columns"
     :checked-rows.sync="checkedRows"
     checkable
     >
