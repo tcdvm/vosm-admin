@@ -1,5 +1,37 @@
 <template>
   <div id="app">
+  <nav class="level">
+    <div class="level-item has-text-centered">
+      <div>
+        <p class="heading">Total Registered</p>
+        <p class="title">{{stats.numRegistered}}</p>
+      </div>
+    </div>
+    <div class="level-item has-text-centered">
+      <div>
+        <p class="heading">ACVO/ECVO Diplomates</p>
+        <p class="title">{{stats.numDiplomates}}</p>
+      </div>
+    </div>
+    <div class="level-item has-text-centered">
+      <div>
+        <p class="heading">Presenters</p>
+        <p class="title">{{stats.numPresenters}}</p>
+      </div>
+    </div>
+    <div class="level-item has-text-centered">
+      <div>
+        <p class="heading">House Officers</p>
+        <p class="title">{{stats.numHouseOfficers}}</p>
+      </div>
+    </div>
+    <div class="level-item has-text-centered">
+      <div>
+        <p class="heading">RSVP for Reception</p>
+        <p class="title">{{stats.numReception}}</p>
+      </div>
+    </div>
+  </nav>
     <section>
     <b>Total checked</b>: {{ checkedRows.length }}
     <button class="button field is-danger" @click="checkedRows = []"
@@ -84,6 +116,33 @@ export default {
         perPage: 150
       }
     }
+  },
+  computed: {
+    stats: function() {
+      let registerStats = this.attendees.reduce((totals, attender) => {
+        if(totals[attender.category]) {
+          totals[attender.category]++;
+        } else {
+          totals[attender.category] = 1;
+        }
+        return totals;
+      }, {});
+
+      let rsvpd = this.attendees.reduce((total, attender) => {
+        if(attender.reception === "yes")
+          total++;
+        return total;
+      },0 )
+
+      let stats = {
+        numRegistered: this.attendees.length,
+        numDiplomates: registerStats.aecvodip,
+        numPresenters: registerStats.presenter,
+        numHouseOfficers: registerStats.houseofficer,
+        numReception: rsvpd
+      }
+      return stats;
+    },
   },
   firebase: {
     attendees: attendeesRef,
