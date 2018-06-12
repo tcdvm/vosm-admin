@@ -1,14 +1,42 @@
 <template>
   <div id="app">
+    <section>
+    <b>Total checked</b>: {{ checkedRows.length }}
+    <button class="button field is-danger" @click="checkedRows = []"
+        :disabled="!checkedRows.length">
+        <b-icon icon="close"></b-icon>
+        <span>Delete Selected Rows</span>
+    </button> 
+
     <b-table 
     :data="attendees" 
     :checked-rows.sync="checkedRows"
+    default-sort="name"
     checkable
     >
-     <template slot="bottom-left">
-      <b>Total checked</b>: {{ checkedRows.length }}
+    <template slot-scope="props">
+      <b-table-column field="name" label="Name" sortable >
+          {{ props.row.name }}
+      </b-table-column>
+
+      <b-table-column field="email" label="Email" sortable >
+          {{ props.row.email }}
+      </b-table-column>
+
+      <b-table-column field="category" label="Category" sortable>
+          {{ props.row.category }}
+      </b-table-column>
+
+      <b-table-column field="company" label="Company" sortable>
+          {{ props.row.company }}
+      </b-table-column>
+
+      <b-table-column field="country" label="Country" sortable >
+          {{ props.row.country }}
+      </b-table-column>
      </template>
     </b-table>
+    </section>
   </div>
 </template>
 
@@ -26,13 +54,7 @@ export default {
     return {
       attendees: {},
       checkedRows: [],
-      test: [
-              { 'id': 1, 'first_name': 'Jesse', 'last_name': 'Simmons', 'date': '2016-10-15 13:43:27', 'gender': 'Male' },
-              { 'id': 2, 'first_name': 'John', 'last_name': 'Jacobs', 'date': '2016-12-15 06:00:53', 'gender': 'Male' },
-              { 'id': 3, 'first_name': 'Tina', 'last_name': 'Gilbert', 'date': '2016-04-26 06:26:28', 'gender': 'Female' },
-              { 'id': 4, 'first_name': 'Clarence', 'last_name': 'Flores', 'date': '2016-04-10 10:28:46', 'gender': 'Male' },
-              { 'id': 5, 'first_name': 'Anne', 'last_name': 'Lee', 'date': '2016-12-06 14:38:38', 'gender': 'Female' }
-            ],
+      defaultSortDirection: 'asc',
       columns: [
             {
                 field: 'name',
