@@ -10,6 +10,7 @@
   "dependencies": {
     "buefy": "^0.6.6",
     "firebase": "^5.0.4",
+    "lodash": "^4.17.10",
     "vue": "^2.5.16",
     "vue-json-excel": "^0.2.5",
     "vuefire": "^1.4.5"

@@ -44,6 +44,21 @@
       </div>
     </div>
   </nav>
+  <section class="container">
+      <p><strong>Open Spots (click to edit):</strong>
+      <a @click="promptDipNumber"> Diplomates: {{dipnumber['.value']}}</a>
+       | 
+      <a @click="promptOtherNumber"> Other: {{ othernumber['.value']}}</a>
+      </p>
+    <!-- <nav class="level">
+          <p class="level-item"><strong>Open Spots:</strong></p>
+          <p class="level-item">Diplomates: {{dipnumber['.value']}}</p>
+          <p class="level-item"><a class="button is-success" @click="promptDipNumber">Edit</a></p>
+          <p class="level-item"> | </p>
+          <p class="level-item">Other: {{ othernumber['.value']}}</p>
+          <p class="level-item"><a class="button is-success" @click="promptOtherNumber">Edit</a></p>
+    </nav> -->
+  </section>
   <section class="section">
     <nav class="level">
       <!-- Left side -->
@@ -58,10 +73,23 @@
             <button class="button field is-danger" @click="confirmDeleteSelected"
               :disabled="!checkedRows.length">
               <b-icon icon="close"></b-icon>
-              <span>Delete Selected Attendees</span>
+              <span>Delete Checked Attendees</span>
             </button> 
           </div>
         </div>
+        <div class="level-item">
+          <div class="field">
+            <button class="button field is-purple" 
+              @click="isComponentModalActive = true"
+              :disabled="Object.keys(selected).length === 0">
+              <!-- :disabled="!selected"> -->
+              <b-icon icon="pencil"></b-icon>
+              <span>Edit Selected Attendees</span>
+            </button> 
+          </div>
+        </div>
+      </div>
+      <div class="level-right">
         <div class="level-item">
           <b-field>
             <b-input placeholder="Search by name..."
@@ -72,15 +100,20 @@
           </b-field>
         </div>
       </div>
-        <div class="level-right">
-          <p class="level-item"><strong>Open Spots:</strong></p>
-          <p class="level-item">Diplomates: {{dipnumber['.value']}}</p>
-          <p class="level-item"><a class="button is-success" @click="promptDipNumber">Edit</a></p>
-          <p class="level-item"> | </p>
-          <p class="level-item">Other: {{ othernumber['.value']}}</p>
-          <p class="level-item"><a class="button is-success" @click="promptOtherNumber">Edit</a></p>
-        </div>
     </nav>
+    
+    <b-modal 
+      :active.sync="isComponentModalActive" 
+      has-modal-card>
+        <modal-form 
+          :email="selected.email"
+          :name="selected.name"
+          :company="selected.company"
+          :country="selected.country"
+          :reception="selected.reception"
+          @update="updateSelected"
+        ></modal-form>
+    </b-modal>
 
     <b-table 
     :data="filter" 
@@ -88,6 +121,7 @@
     default-sort="name"
     :paginated="isPaginated"
     :perPage="perPage"
+    :selected.sync="selected"
     checkable
     >
     <template slot-scope="props">
@@ -146,15 +180,94 @@ const deleteAttendee = function(attendee) {
   attendeesRef.child(attendee['.key']).remove()
 }
 
+const ModalForm = {
+    props: ['name', 'email', 'country', 'company', 'reception'],
+    methods: {
+      updateSelected: function (info) {
+        this.$emit('update', info);
+        console.log(info);
+      }
+    },
+    template: `
+      <form v-on:submit.prevent="updateSelected({name, email, country, company, reception})"> 
+          <div class="modal-card" style="width: 500">
+              <header class="modal-card-head">
+                  <p class="modal-card-title">Edit Attendee</p>
+              </header>
+              <section class="modal-card-body">
+                  <b-field label="Name" horizontal>
+                      <b-input
+                          type="text"
+                          :value="name"
+                          placeholder="Name"
+                          required>
+                      </b-input>
+                  </b-field>
+
+                  <b-field label="Email" horizontal>
+                      <b-input
+                          type="email"
+                          :value="email"
+                          placeholder="Email"
+                          required>
+                      </b-input>
+                  </b-field>
+
+                  <b-field label="Country" horizontal>
+                      <b-input
+                          type="text"
+                          :value="country"
+                          placeholder="Country"
+                          required>
+                      </b-input>
+                  </b-field>
+
+                  <b-field label="Company" horizontal>
+                      <b-input
+                          type="text"
+                          :value="company"
+                          placeholder="Company"
+                          required>
+                      </b-input>
+                  </b-field>
+
+<!--
+                  <div class="block">
+                    <b-radio 
+                        native-value="Yes">
+                        Flint
+                    </b-radio>
+                    <b-radio v-model="radio"
+                        native-value="Silver">
+                        Silver
+                    </b-radio>
+                  </div>
+-->
+              </section>
+              <footer class="modal-card-foot">
+                  <button class="button" type="button" @click="$parent.close()">Close</button>
+                  <button 
+                    class="button is-primary" 
+                  >
+                    Update
+                  </button>
+              </footer>
+          </div>
+      </form>
+  `,
+}
+
 export default {
   name: 'app',
   components: {
+    ModalForm
   },
   data() {
     return {
       attendees: {},
       searchQuery: '',
       checkedRows: [],
+      selected: {},
       defaultSortDirection: 'asc',
       isPaginated: true,
       currentPage: 1,
@@ -217,7 +330,12 @@ export default {
           }
          },
         'reception': 'reception'
-      }
+      },
+      isComponentModalActive: false,
+      // formProps: {
+      //     email: 'hi@hi.com',
+      //     password: 'testing'
+      // }
     }
   },
   computed: {
@@ -329,9 +447,17 @@ export default {
             otherRegistrantNumberRef.set(parseInt(value))
           }
       })
+    },
+    updateSelected: function () {
+      this.isComponentModalActive = false;
+      this.$toast.open(this.selected.email);
+      // console.log(this.selected.email);
     }
   }
 }
+
+
+
 </script>
 
 <style>
@@ -342,5 +468,14 @@ export default {
   text-align: center;
   color: #2c3e50;
   margin-top: 60px;
+}
+
+.button.is-purple {
+  background-color: #7957d5;
+  color: #FFF;
+}
+.button.is-purple[disabled]{
+  background-color: #7957d5;
+  color: #FFF;
 }
 </style>
